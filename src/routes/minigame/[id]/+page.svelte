@@ -1,10 +1,32 @@
 <script lang="ts">
 	import { goto, invalidateAll } from "$app/navigation";
 	import { DIYPlayer } from "diyplayer";
+	import { onMount } from "svelte";
 
 	let { data } = $props();
-	let minigame = $derived(data.minigame);
-	let isOwner = $derived(data.isOwner);
+	let session = $derived(data.session);
+	let id = $derived(data.id)
+	let minigame = $state({});
+	let isOwner = $state(false);
+
+	onMount(async () => {
+		try {
+			const res = await fetch(`/api/minigame/${id}`, {
+				method: "GET"
+			});
+
+			if (res.ok) {
+				const result = await res.json();
+				console.log(result);
+				minigame = result;
+				isOwner = minigame.ownerId === session?.user.id
+			}
+
+		} catch(e) {
+			// TODO: add error that shows up
+			console.log(e);
+		}
+	})
 
 	let editing = $state(false);
 	let editName = $state("");

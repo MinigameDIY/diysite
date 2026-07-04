@@ -4,12 +4,12 @@ import { error, json } from "@sveltejs/kit";
 import { unlink } from "fs/promises";
 import path from "path";
 import type { RequestHandler } from "./$types";
+import { requireLogin } from "$lib/server/require-login";
 
 const UPLOAD_DIR = path.resolve("store/minigame_uploads");
 
 export const DELETE: RequestHandler = async ({ params, request }) => {
-	const session = await auth.api.getSession({ headers: request.headers });
-	if (!session) throw error(401, "Not logged in");
+	const session = await requireLogin(request);
 
 	const minigame = db.prepare(`SELECT * FROM minigame WHERE id = ?`).get(params.id) as any;
     

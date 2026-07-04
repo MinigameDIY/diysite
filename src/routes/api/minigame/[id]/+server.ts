@@ -2,14 +2,42 @@ import { auth } from "$lib/server/auth";
 import { db } from "$lib/server/db";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { VALID_VISIBILITIES } from "$lib/server/upload-utils";
+import { requireLogin } from "$lib/server/require-login";
 
-const VALID_VISIBILITIES = ["public", "unlisted", "private"];
+export const GET: RequestHandler = async ({ params, request }) => {
+	const minigameId = params.id;
+
+	const session = await auth.api.getSession({ headers: request.headers });
+
+	const minigame = db
+		.prepare(
+			`
+	SELECT minigame.*, user.id AS ownerId, user.name AS ownerName
+	FROM minigame
+	JOIN user ON user.id = minigame.userId
+	WHERE minigame.id = ?
+	`,
+		)
+		.get(params.id) as any;
+
+	if (!minigame) throw error(404, "minigame not found");
+
+	const isOwner = session?.user.id === minigame.userId;
+
+	if (minigame.visibility === "private" && !isOwner) {
+		throw error(403, "This minigame is private");
+	}
+
+	return new Response(JSON.stringify(minigame));
+};
 
 export const PATCH: RequestHandler = async ({ params, request }) => {
-	const session = await auth.api.getSession({ headers: request.headers });
-	if (!session) throw error(401, "Not logged in");
+	const session = await requireLogin(request);
 
-	const minigame = db.prepare(`SELECT * FROM minigame WHERE id = ?`).get(params.id) as any;
+	const minigame = db
+		.prepare(`SELECT * FROM minigame WHERE id = ?`)
+		.get(params.id) as any;
 	if (!minigame) throw error(404, "Minigame not found");
 
 	const isOwner = session.user.id === minigame.userId;

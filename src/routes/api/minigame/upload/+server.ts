@@ -5,14 +5,13 @@ import { randomUUID } from "crypto";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import type { RequestHandler } from "./$types";
+import { MAX_FILE_SIZE, UPLOAD_DIR, validVisibilityOrDefault } from "$lib/server/upload-utils";
+import { requireLogin } from "$lib/server/require-login";
 
-const UPLOAD_DIR = path.resolve("store/minigame_uploads");
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const VALID_VISIBILITIES = ["public", "unlisted", "private"];
+
 
 export const POST: RequestHandler = async ({ request }) => {
-    const session = await auth.api.getSession({ headers: request.headers });
-    if (!session) throw error(401, "Not logged in");
+    const session = await requireLogin(request);
 
     const formData = await request.formData();
     const name = formData.get("name")?.toString().trim();
@@ -25,9 +24,7 @@ export const POST: RequestHandler = async ({ request }) => {
     if (file.size > MAX_FILE_SIZE) throw error(400, "File must be 5MB or smaller");
 
     const visibility = formData.get("visibility")?.toString();
-    const finalVisibility = VALID_VISIBILITIES.includes(visibility ?? "")
-    ? visibility
-    : "private";
+    const finalVisibility = validVisibilityOrDefault(visibility);
 
     await mkdir(UPLOAD_DIR, { recursive: true });
 
