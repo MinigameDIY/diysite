@@ -1,6 +1,6 @@
 <script lang="ts">
 	interface Props {
-		project: {
+		minigame: {
 			id: number | string;
 			name: string;
 			description?: string | null;
@@ -14,37 +14,37 @@
 	}
 
 	let {
-		project,
+		minigame,
 		showVisibility = false,
 		showOwner = false,
 	}: Props = $props();
 </script>
 
-<div class="project-card">
-	<h3><a href={`/minigame/${project.id}`}>{project.name}</a></h3>
+<div class="minigame-card">
+	<h3><a href={`/minigame/${minigame.id}`}>{minigame.name}</a></h3>
 
-	{#if showOwner && project.ownerName}
+	{#if showOwner && minigame.ownerName}
 		<p class="owner">
-			by <a href={`/user/${project.userId}/profile`}>{project.ownerName}</a>
+			by <a href={`/user/${minigame.userId}/profile`}>{minigame.ownerName}</a>
 		</p>
 	{/if}
 
-	{#if project.description}
-		<p class="description">{project.description}</p>
+	{#if minigame.description}
+		<p class="description">{minigame.description}</p>
 	{/if}
 
 	<p class="meta">
-		{#if showVisibility && project.visibility}
-			<span class="badge">{project.visibility}</span>
+		{#if showVisibility && minigame.visibility}
+			<span class="badge">{minigame.visibility}</span>
 		{/if}
-		<span class="date">{new Date(project.createdAt).toLocaleDateString()}</span>
+		<span class="date">{new Date(minigame.createdAt).toLocaleDateString()}</span>
 	</p>
 
-	<a href={`/api/download/${project.id}`} class="download-btn">Download .sb3</a>
+	<a href={`/api/minigame/${minigame.id}/download`} class="download-btn">Download .sb3</a>
 </div>
 
 <style>
-	.project-card {
+	.minigame-card {
 		border: 1px solid #ccc;
 		border-radius: 8px;
 		padding: 1rem;

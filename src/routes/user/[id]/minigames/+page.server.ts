@@ -8,19 +8,19 @@ export const load: PageServerLoad = async ({ params, request, parent }) => {
 
   const isOwnProfile = session?.user.id === profileUser.id;
 
-  const projects = isOwnProfile
+  const minigames = isOwnProfile
     ? db.prepare(`
         SELECT id, name, description, visibility, createdAt
-        FROM project
+        FROM minigame
         WHERE userId = ?
         ORDER BY createdAt DESC
       `).all(params.id)
     : db.prepare(`
         SELECT id, name, description, visibility, createdAt
-        FROM project
+        FROM minigame
         WHERE userId = ? AND visibility = 'public'
         ORDER BY createdAt DESC
       `).all(params.id);
 
-  return { projects, isOwnProfile };
+  return { minigames, isOwnProfile };
 };

@@ -2,12 +2,12 @@ import { db } from "$lib/server/db";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async () => {
-    const projects = db.prepare(`
-    SELECT project.id, project.name, project.description, project.createdAt, project.userId, user.name AS ownerName
-    FROM project
-    JOIN user ON user.id = project.userId
-    WHERE project.visibility = 'public'
-    ORDER BY project.createdAt DESC
+    const minigames = db.prepare(`
+    SELECT minigame.id, minigame.name, minigame.description, minigame.createdAt, minigame.userId, user.name AS ownerName
+    FROM minigame
+    JOIN user ON user.id = minigame.userId
+    WHERE minigame.visibility = 'public'
+    ORDER BY minigame.createdAt DESC
     `).all();
-  return { projects };
+  return { minigames };
 };

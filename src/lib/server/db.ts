@@ -4,8 +4,8 @@ import path from "path";
 export const db = new Database(path.resolve("sqlite.db"));
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS project (
-    id TEXT PRIMARY KEY,
+  CREATE TABLE IF NOT EXISTS minigame (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     userId TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT,

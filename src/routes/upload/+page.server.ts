@@ -6,7 +6,7 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import type { Actions, PageServerLoad } from "./$types";
 
-const UPLOAD_DIR = path.resolve("store/project_uploads");
+const UPLOAD_DIR = path.resolve("store/minigame_uploads");
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const VALID_VISIBILITIES = ["public", "unlisted", "private"];
 
@@ -54,10 +54,10 @@ export const actions: Actions = {
 		await writeFile(filePath, buffer);
 
 		db.prepare(`
-        INSERT INTO project (id, userId, name, description, filePath, visibility)
+        INSERT INTO minigame (id, userId, name, description, filePath, visibility)
         VALUES (?, ?, ?, ?, ?, ?)
         `,).run(id, session.user.id, name, description, storedFilename, finalVisibility);
 
-		throw redirect(303, "user/" + session.user.id + "/projects");
+		throw redirect(303, "user/" + session.user.id + "/minigames");
 	},
 };

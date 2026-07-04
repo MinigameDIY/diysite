@@ -6,20 +6,20 @@ import type { PageServerLoad } from "./$types";
 export const load: PageServerLoad = async ({ params, request }) => {
   const session = await auth.api.getSession({ headers: request.headers });
 
-  const project = db.prepare(`
-    SELECT project.*, user.id AS ownerId, user.name AS ownerName
-    FROM project
-    JOIN user ON user.id = project.userId
-    WHERE project.id = ?
+  const minigame = db.prepare(`
+    SELECT minigame.*, user.id AS ownerId, user.name AS ownerName
+    FROM minigame
+    JOIN user ON user.id = minigame.userId
+    WHERE minigame.id = ?
   `).get(params.id) as any;
 
-  if (!project) throw error(404, "Project not found");
+  if (!minigame) throw error(404, "minigame not found");
 
-  const isOwner = session?.user.id === project.userId;
+  const isOwner = session?.user.id === minigame.userId;
 
-  if (project.visibility === "private" && !isOwner) {
+  if (minigame.visibility === "private" && !isOwner) {
     throw error(403, "This minigame is private");
   }
 
-  return { project, isOwner };
+  return { minigame, isOwner };
 };
