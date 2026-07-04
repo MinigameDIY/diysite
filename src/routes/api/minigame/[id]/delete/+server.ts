@@ -13,7 +13,7 @@ export const DELETE: RequestHandler = async ({ params, request }) => {
 
 	const minigame = db.prepare(`SELECT * FROM minigame WHERE id = ?`).get(params.id) as any;
     
-	if (minigame) throw error(404, "Minigame not found");
+	if (!minigame) throw error(404, "Minigame not found");
 
 	const isOwner = session.user.id === minigame.userId;
 	const isAdmin = session.user.role === "admin";

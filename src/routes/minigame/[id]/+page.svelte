@@ -9,7 +9,7 @@
   async function handleDelete() {
     if (!confirm("Delete this minigame? This can't be undone.")) return;
 
-    const res = await fetch(`/api/minigame/delete/${minigame.id}`, {
+    const res = await fetch(`/api/minigame/${minigame.id}/delete`, {
       method: "DELETE",
     });
 
