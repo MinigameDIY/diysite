@@ -12,6 +12,7 @@
 
 {#if $session.data}
 	<p>Hi {$session.data.user.name}!</p>
+	<a href="upload">Upload Project</a>
 	<button onclick={handleLogout}>Log Out</button> 
 {:else}
 	<a href="/login">Log in</a> or <a href="/signup">Sign up</a>
