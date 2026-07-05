@@ -1,12 +1,12 @@
-import { auth } from "$lib/server/auth";
-import { db } from "$lib/server/db";
+import { auth } from "$lib/server/auth/auth"
+import { db } from "$lib/server/db/db";
 import { error, json } from "@sveltejs/kit";
 import { randomUUID } from "crypto";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import type { RequestHandler } from "./$types";
-import { MAX_FILE_SIZE, UPLOAD_DIR, validVisibilityOrDefault } from "$lib/server/upload-utils";
-import { requireLogin } from "$lib/server/require-login";
+import { MAX_FILE_SIZE, UPLOAD_DIR, validVisibilityOrDefault } from "$lib/server/storage/upload-utils";
+import { requireLogin } from "$lib/server/auth/require-login";
 
 
 

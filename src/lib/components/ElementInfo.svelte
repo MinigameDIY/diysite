@@ -94,7 +94,7 @@
 	async function handleDelete() {
 		if (!confirm("Delete this collection? This can't be undone.")) return;
 
-		const res = await fetch(`/api/${elementType}/${element.id}/delete`, {
+		const res = await fetch(`/api/${elementType}/${element.id}`, {
 			method: "DELETE",
 		});
 

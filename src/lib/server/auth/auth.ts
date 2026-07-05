@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
 import Database from "better-sqlite3";
 import { BETTER_AUTH_SECRET, BETTER_AUTH_URL } from "$env/static/private";
+import { db } from "../db/db";
 
 export const auth = betterAuth({
-  database: new Database("./sqlite.db"),
+  database: db,
   secret: BETTER_AUTH_SECRET,
   baseURL: BETTER_AUTH_URL,
   emailAndPassword: { enabled: true },

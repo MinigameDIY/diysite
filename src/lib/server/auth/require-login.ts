@@ -1,4 +1,4 @@
-import { auth } from "$lib/server/auth";
+import { auth } from "$lib/server/auth/auth";
 import { error } from "@sveltejs/kit";
 
 export async function requireLogin(request: Request) {

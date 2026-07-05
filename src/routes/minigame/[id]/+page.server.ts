@@ -1,4 +1,4 @@
-import { auth } from "$lib/server/auth";
+import { auth } from "$lib/server/auth/auth"
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ params, request }) => {

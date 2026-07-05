@@ -1,4 +1,4 @@
-import { db } from "$lib/server/db";
+import { db } from "$lib/server/db/db";
 import { error } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 

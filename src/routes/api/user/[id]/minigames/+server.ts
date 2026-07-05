@@ -1,5 +1,5 @@
-import { auth } from "$lib/server/auth";
-import { db } from "$lib/server/db";
+import { auth } from "$lib/server/auth/auth"
+import { db } from "$lib/server/db/db";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 

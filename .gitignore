@@ -19,7 +19,7 @@ Thumbs.db
 !.env.test
 
 # DB
-sqlite.db
+*.db
 /store
 
 # Vite

@@ -1,7 +1,7 @@
-import { db } from "$lib/server/db";
+import { db } from "$lib/server/db/db";
 import { error } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import { requireAdmin } from "$lib/server/require-admin";
+import { requireAdmin } from "$lib/server/auth/require-admin";
 
 export const load: PageServerLoad = async () => {
   const users = db.prepare(`SELECT id, name, email, role, createdAt FROM user ORDER BY createdAt DESC`).all();

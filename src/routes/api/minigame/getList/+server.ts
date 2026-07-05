@@ -1,9 +1,9 @@
-import { auth } from "$lib/server/auth";
-import { db } from "$lib/server/db";
+import { auth } from "$lib/server/auth/auth"
+import { db } from "$lib/server/db/db";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { VALID_VISIBILITIES } from "$lib/server/upload-utils";
-import { requireLogin } from "$lib/server/require-login";
+import { VALID_VISIBILITIES } from "$lib/server/storage/upload-utils";
+import { requireLogin } from "$lib/server/auth/require-login";
 
 export const GET: RequestHandler = async ({ url, request }) => {
 	const idsString = url.searchParams.get('ids');

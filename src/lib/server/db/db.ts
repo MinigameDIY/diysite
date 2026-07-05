@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import path from "path";
 
-export const db = new Database(path.resolve("sqlite.db"));
+export const db = new Database(path.resolve("store/sqlite.db"));
 db.pragma('foreign_keys = ON');
 db.exec(`
   CREATE TABLE IF NOT EXISTS minigame (

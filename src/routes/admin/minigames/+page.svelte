@@ -6,7 +6,7 @@
 		if (!confirm(`Delete minigame "${name}"? This can't be undone.`))
 			return;
 
-		const res = await fetch(`/api/minigame/${minigameId}/delete`, {
+		const res = await fetch(`/api/minigame/${minigameId}`, {
 			method: "DELETE",
 		});
 

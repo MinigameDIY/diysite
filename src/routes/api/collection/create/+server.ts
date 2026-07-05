@@ -1,10 +1,10 @@
-import { auth } from "$lib/server/auth";
-import { db } from "$lib/server/db";
+import { auth } from "$lib/server/auth/auth"
+import { db } from "$lib/server/db/db";
 import { error, json } from "@sveltejs/kit";
 import { randomUUID } from "crypto";
 import type { RequestHandler } from "./$types";
-import { requireLogin } from "$lib/server/require-login";
-import { validVisibilityOrDefault } from "$lib/server/upload-utils";
+import { requireLogin } from "$lib/server/auth/require-login";
+import { validVisibilityOrDefault } from "$lib/server/storage/upload-utils";
 
 export const POST: RequestHandler = async ({ request }) => {
     const session = await requireLogin(request);
