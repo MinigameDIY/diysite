@@ -14,7 +14,6 @@
 
 			if (res.ok) {
 				const result = await res.json();
-				console.log(result);
 				minigameIds = result;
 			}
 		} catch (e) {

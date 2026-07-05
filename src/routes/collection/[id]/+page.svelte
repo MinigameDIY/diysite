@@ -24,8 +24,6 @@
 				collection = result;
 				isOwner = collection.ownerId === user?.id
 				collection_minigames = collection.minigames
-
-				console.log($state.snapshot(collection.minigames))
 			}
 
 		} catch(e) {
