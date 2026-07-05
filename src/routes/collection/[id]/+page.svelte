@@ -15,7 +15,7 @@
 
 	onMount(async () => {
 		try {
-			const res = await fetch(`/api/collection/${id}`, {
+			const res = await fetch(`/api/collection/${id}?includeMinigames`, {
 				method: "GET"
 			});
 
@@ -23,6 +23,9 @@
 				const result = await res.json();
 				collection = result;
 				isOwner = collection.ownerId === user?.id
+				collection_minigames = collection.minigames
+
+				console.log($state.snapshot(collection.minigames))
 			}
 
 		} catch(e) {
@@ -30,32 +33,10 @@
 			console.log(e);
 		}
 
-		if (collection) {
-			try {
-				const res = await fetch(`/api/minigame/getList?ids=${collection.minigames}`, {
-					method: "GET"
-				});
-
-				if (res.ok) {
-					const result = await res.json();
-					collection_minigames = result;
-
-					for (let i in collection_minigames) {
-						let minigame = collection_minigames[i];
-						minigame.isOwner = minigame.ownerId === user?.id;
-					}
-				}
-
-			} catch(e) {
-				// TODO: add error that shows up
-				console.log(e);
-			}
-		}
-
 		
-		collection_minigames.forEach(minigame => {
+		for (minigame of collection_minigames) {
 			diyUrls.push(`/api/minigame/${minigame.id}/download`)
-		});
+		}
 	})
 </script>
 

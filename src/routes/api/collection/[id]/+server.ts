@@ -1,14 +1,15 @@
 import { auth } from "$lib/server/auth/auth"
 import { db } from "$lib/server/db/db";
-import { collection, collectionMinigames } from "$lib/server/db/schema";
+import { collection, collectionMinigames, minigame } from "$lib/server/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { VALID_VISIBILITIES } from "$lib/server/storage/upload-utils";
 import { requireLogin } from "$lib/server/auth/require-login";
 
-export const GET: RequestHandler = async ({ params, request }) => {
+export const GET: RequestHandler = async ({ url, params, request }) => {
 	const collectionId = params.id;
+	const shouldIncludeMinigames = url.searchParams.has('includeMinigames');
 
 	const session = await auth.api.getSession({ headers: request.headers });
 
@@ -35,6 +36,11 @@ export const GET: RequestHandler = async ({ params, request }) => {
 
 	if (!collection_minigames) throw error(404, "collection_minigames not found");
 
+	let finalMinigames: any = collection_minigames.map(item => item.minigameId);
+	if (shouldIncludeMinigames) {
+		finalMinigames = await getMinigames(finalMinigames, session);
+	}
+
 	const result = {
 		id: coll.id,
 		userId: coll.userId,
@@ -44,11 +50,37 @@ export const GET: RequestHandler = async ({ params, request }) => {
 		createdAt: coll.createdAt,
 		ownerId: coll.user.id,
 		ownerName: coll.user.name,
-		minigames: collection_minigames.map(item => item.minigameId),
+		minigames: finalMinigames,
 	};
 
 	return new Response(JSON.stringify(result));
 };
+
+async function getMinigames(minigameIdList: string[], session: any): Promise<any> {
+	const minigames = await db.query.minigame.findMany({
+		where: inArray(minigame.id, minigameIdList),
+		with: {
+			user: {
+				columns: { id: true, name: true }
+			}
+		}
+	});
+
+	const filtered = minigames.filter(g => {
+		const isOwner = session?.user.id === g.userId;
+		return g.visibility !== "private" || isOwner;
+	});
+
+	
+	const mapped = filtered.map(g => ({
+		...g,
+		ownerId: g.user.id,
+		ownerName: g.user.name,
+		user: undefined
+	}));
+	
+	return mapped;
+}
 
 export const PATCH: RequestHandler = async ({ params, request }) => {
 	const session = await requireLogin(request);
