@@ -180,7 +180,7 @@
 
 			{#if showOwner}
 				<p class="owner">
-					by <a href={`/user/${element.ownerId}/profile`}
+					by <a href={`/user/${element.ownerId}/`}
 						>{element.ownerName}</a
 					>
 					{#if isOwner}
@@ -203,7 +203,7 @@
 			{#if isOwner && canEdit}
 				<div class="owner-actions">
 					<button onclick={startEditing}>Edit</button>
-					<button onclick={handleDelete} class="delete-btn">Delete ${elementType}</button>
+					<button onclick={handleDelete} class="delete-btn">Delete {elementType}</button>
 				</div>
 			{/if}
 		{/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import MinigameCard from "$lib/components/MinigameCard.svelte";
+  import ElementCard from "$lib/components/ElementCard.svelte";
   let { data } = $props();
 </script>
 
@@ -7,7 +7,7 @@
 
 <div class="containerDiv">
   {#each data.minigames as minigame}
-    <MinigameCard {minigame} showOwner={true} />
+    <ElementCard element={minigame} elementType="minigame" showOwner={true} />
   {/each}
 </div>
 

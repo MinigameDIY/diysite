@@ -14,7 +14,7 @@
     {#each data.users as u}
       <tr>
         <td>{u.name}</td>
-        <td><a href={`/user/${u.id}/profile`}>{u.id}</a></td>
+        <td><a href={`/user/${u.id}/`}>{u.id}</a></td>
         <td>{u.email}</td>
         <td>{u.role}</td>
         <td>{new Date(u.createdAt).toLocaleDateString()}</td>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	interface Props {
-		minigame: {
+		element: {
 			id: number | string;
 			name: string;
 			description?: string | null;
@@ -9,40 +9,42 @@
 			userId?: string;
 			ownerName?: string;
 		};
+		elementType: string;
 		showVisibility?: boolean;
 		showOwner?: boolean;
 	}
 
 	let {
-		minigame,
+		element,
 		showVisibility = false,
 		showOwner = true,
+		elementType = "",
 	}: Props = $props();
 </script>
 
-<div class="minigame-card">
-	<h3><a href={`/minigame/${minigame.id}`}>{minigame.name}</a></h3>
+<div class="element-card">
+	<h3><a href={`/${elementType}/${element.id}`}>{element.name}</a></h3>
 
-	{#if showOwner && minigame.ownerName}
+	{#if showOwner && element.ownerName}
 		<p class="owner">
-			by <a href={`/user/${minigame.userId}/profile`}>{minigame.ownerName}</a>
+			by <a href={`/user/${element.userId}/`}>{element.ownerName}</a>
 		</p>
 	{/if}
 
-	{#if minigame.description}
-		<p class="description">{minigame.description}</p>
+	{#if element.description}
+		<p class="description">{element.description}</p>
 	{/if}
 
 	<p class="meta">
-		{#if showVisibility && minigame.visibility}
-			<span class="badge">{minigame.visibility}</span>
+		{#if showVisibility && element.visibility}
+			<span class="badge">{element.visibility}</span>
 		{/if}
-		<span class="date">{new Date(minigame.createdAt).toLocaleDateString()}</span>
+		<span class="date">{new Date(element.createdAt).toLocaleDateString()}</span>
 	</p>
 </div>
 
 <style>
-	.minigame-card {
+	.element-card {
 		border: 1px solid #ccc;
 		border-radius: 8px;
 		padding: 1rem;

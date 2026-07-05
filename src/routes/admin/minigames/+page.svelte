@@ -55,7 +55,7 @@
 			<tr>
 				<td>{m.name}</td>
 				<td><a href={`/minigame/${m.id}`}>{m.id}</a></td>
-				<td><a href={`/user/${m.userId}/profile`}>{m.ownerName}</a></td>
+				<td><a href={`/user/${m.userId}/`}>{m.ownerName}</a></td>
 				<td>
 					<select
 						value={m.visibility}

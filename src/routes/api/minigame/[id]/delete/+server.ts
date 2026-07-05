@@ -29,5 +29,13 @@ export const DELETE: RequestHandler = async ({ params, request }) => {
 
 	db.prepare(`DELETE FROM minigame WHERE id = ?`).run(params.id);
 
+	const deleteCommand = db.prepare(`DELETE FROM collection_minigames WHERE minigameId = ?`);
+
+	const deleteTransaction = db.transaction((id: string) => {
+		deleteCommand.run(id);
+	});
+	
+	deleteTransaction(params.id);
+
 	return json({ success: true });
 };

@@ -16,7 +16,7 @@
 	<a href="/explore">Explore</a>
 
 	{#if $session.data}
-		<a href="/user/{$session.data.user.id}/profile">My account</a>
+		<a href="/user/{$session.data.user.id}/">My account</a>
 	{:else}
 		<a href="/login">Log In</a>
 		<a href="/signup">Sign Up</a>

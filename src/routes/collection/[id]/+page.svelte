@@ -1,11 +1,11 @@
 <script lang="ts">
-	import InfoCard from "$lib/components/InfoCard.svelte";
-	import MinigameCard from "$lib/components/MinigameCard.svelte";
+	import ElementInfo from "$lib/components/ElementInfo.svelte";
+	import ElementCard from "$lib/components/ElementCard.svelte";
 	import { DIYPlayer } from "diyplayer";
 	import { onMount } from "svelte";
 
 	let { data } = $props();
-	let session = $derived(data.session);
+	let user = $derived(data.user);
 	let id = $derived(data.id)
 	let collection = $state({});
 	let collection_minigames = $state([])
@@ -22,7 +22,7 @@
 			if (res.ok) {
 				const result = await res.json();
 				collection = result;
-				isOwner = collection.ownerId === session?.user.id
+				isOwner = collection.ownerId === user?.id
 			}
 
 		} catch(e) {
@@ -42,7 +42,7 @@
 
 					for (let i in collection_minigames) {
 						let minigame = collection_minigames[i];
-						minigame.isOwner = minigame.ownerId === session?.user.id;
+						minigame.isOwner = minigame.ownerId === user?.id;
 					}
 				}
 
@@ -65,11 +65,11 @@
 		<DIYPlayer projectUrls={diyUrls}/>
 	</div>
 	<div class="column-container">
-		<InfoCard element={collection} elementType="collection" showOwner={true} isOwner={isOwner} showVisibility={isOwner} canEdit={true} />
+		<ElementInfo element={collection} elementType="collection" showOwner={true} isOwner={isOwner} showVisibility={isOwner} canEdit={true} />
 
 		<div class="minigame-container">
 			{#each collection_minigames as minigame}
-				<MinigameCard {minigame} showOwner={true} showVisibility={minigame?.isOwner ?? false} />
+				<ElementCard element={minigame} elementType="minigame" showOwner={true} showVisibility={minigame?.isOwner ?? false} />
 			{/each}
 		</div>
 	</div>

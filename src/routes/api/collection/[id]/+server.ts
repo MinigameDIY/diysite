@@ -114,7 +114,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 			if (toRemove.length > 0) {
 				const deleteCommand = db.prepare(`DELETE FROM collection_minigames WHERE collection_id = ? AND minigameId = ?`);
 	
-				const deleteTransaction = db.transaction((ids: string) => {
+				const deleteTransaction = db.transaction((ids: string[]) => {
 					for (const id of ids) {
 						deleteCommand.run(params.id, id);
 					}

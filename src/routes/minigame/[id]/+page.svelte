@@ -1,10 +1,10 @@
 <script lang="ts">
-	import InfoCard from "$lib/components/InfoCard.svelte";
+	import ElementInfo from "$lib/components/ElementInfo.svelte";
 	import { DIYPlayer } from "diyplayer";
 	import { onMount } from "svelte";
 
 	let { data } = $props();
-	let session = $derived(data.session);
+	let user = $derived(data.user);
 	let id = $derived(data.id)
 	let minigame = $state({});
 	let isOwner = $state(false);
@@ -18,7 +18,7 @@
 			if (res.ok) {
 				const result = await res.json();
 				minigame = result;
-				isOwner = minigame.ownerId === session?.user.id
+				isOwner = minigame.ownerId === user?.id
 			}
 
 		} catch(e) {
@@ -35,7 +35,7 @@
 		<DIYPlayer projectUrls={[`/api/minigame/${minigame.id}/download`]} />
 	</div>
 	<div class="column-container">
-		<InfoCard element={minigame} elementType="minigame" showOwner={true} isOwner={isOwner} showVisibility={isOwner} canEdit={true} />
+		<ElementInfo element={minigame} elementType="minigame" showOwner={true} isOwner={isOwner} showVisibility={isOwner} canEdit={true} />
 	</div>
 </div>
 
