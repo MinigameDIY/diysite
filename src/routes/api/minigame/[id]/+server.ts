@@ -1,125 +1,121 @@
-import { auth } from "$lib/server/auth/auth"
+import { auth } from "$lib/server/auth/auth";
 import { db } from "$lib/server/db/db";
+import { minigame, collectionMinigames } from "$lib/server/db/schema"; // Import your schema tables
+import { eq } from "drizzle-orm";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { VALID_VISIBILITIES } from "$lib/server/storage/upload-utils";
+import { VALID_VISIBILITIES, UPLOAD_DIR } from "$lib/server/storage/upload-utils";
 import { requireLogin } from "$lib/server/auth/require-login";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 export const GET: RequestHandler = async ({ params, request }) => {
 	const minigameId = params.id;
+	if (!minigameId) throw error(400, "Missing ID");
 
 	const session = await auth.api.getSession({ headers: request.headers });
+	
+	const game = await db.query.minigame.findFirst({
+		where: eq(minigame.id, minigameId),
+		with: {
+			user: {
+				columns: { id: true, name: true }
+			}
+		}
+	});
 
-	const minigame = db
-		.prepare(
-			`
-	SELECT minigame.*, user.id AS ownerId, user.name AS ownerName
-	FROM minigame
-	JOIN user ON user.id = minigame.userId
-	WHERE minigame.id = ?
-	`,
-		)
-		.get(minigameId) as any;
+	if (!game) throw error(404, "minigame not found");
 
-	if (!minigame) throw error(404, "minigame not found");
+	const isOwner = session?.user.id === game.userId;
 
-	const isOwner = session?.user.id === minigame.userId;
-
-	if (minigame.visibility === "private" && !isOwner) {
+	if (game.visibility === "private" && !isOwner) {
 		throw error(403, "This minigame is private");
 	}
 
-	return new Response(JSON.stringify(minigame));
+	return json({
+		...game,
+		ownerId: game.user.id,
+		ownerName: game.user.name,
+		user: undefined
+	});
 };
 
 export const PATCH: RequestHandler = async ({ params, request }) => {
 	const session = await requireLogin(request);
+	const minigameId = params.id;
+	if (!minigameId) throw error(400, "Missing ID");
 
-	const minigame = db
-		.prepare(`SELECT * FROM minigame WHERE id = ?`)
-		.get(params.id) as any;
-	if (!minigame) throw error(404, "Minigame not found");
+	const game = await db.query.minigame.findFirst({
+		where: eq(minigame.id, minigameId),
+	});
+	if (!game) throw error(404, "Minigame not found");
 
-	const isOwner = session.user.id === minigame.userId;
+	const isOwner = session.user.id === game.userId;
 	const isAdmin = session.user.role === "admin";
 	if (!isOwner && !isAdmin) {
 		throw error(403, "You don't have permission to edit this minigame");
 	}
 
 	const body = await request.json();
-
-	const updates: string[] = [];
-	const values: any[] = [];
+	
+	const updateFields: Partial<typeof minigame.$inferInsert> = {};
 
 	if (body.name !== undefined) {
 		const name = body.name?.toString().trim();
 		if (!name) throw error(400, "Name cannot be empty");
-		updates.push("name = ?");
-		values.push(name);
+		updateFields.name = name;
 	}
 
 	if (body.description !== undefined) {
-		updates.push("description = ?");
-		values.push(body.description?.toString().trim() ?? "");
+		updateFields.description = body.description?.toString().trim() ?? "";
 	}
 
 	if (body.visibility !== undefined) {
 		if (!VALID_VISIBILITIES.includes(body.visibility)) {
 			throw error(400, "Invalid visibility value");
 		}
-		updates.push("visibility = ?");
-		values.push(body.visibility);
+		updateFields.visibility = body.visibility;
 	}
 
-	if (updates.length === 0) {
+	if (Object.keys(updateFields).length === 0) {
 		throw error(400, "No valid fields provided to update");
 	}
+	
+	const [updatedGame] = await db
+		.update(minigame)
+		.set(updateFields)
+		.where(eq(minigame.id, minigameId))
+		.returning();
 
-	values.push(params.id);
-
-	db.prepare(
-		`
-    UPDATE minigame
-    SET ${updates.join(", ")}
-    WHERE id = ?
-  `,
-	).run(...values);
-
-	const updated = db
-		.prepare(`SELECT * FROM minigame WHERE id = ?`)
-		.get(params.id);
-
-	return json({ success: true, minigame: updated });
+	return json({ success: true, minigame: updatedGame });
 };
 
 export const DELETE: RequestHandler = async ({ params, request }) => {
 	const session = await requireLogin(request);
+	const minigameId = params.id;
+	if (!minigameId) throw error(400, "Missing ID");
 
-	const minigame = db.prepare(`SELECT * FROM minigame WHERE id = ?`).get(params.id) as any;
-	
-	if (!minigame) throw error(404, "Minigame not found");
+	const game = await db.query.minigame.findFirst({
+		where: eq(minigame.id, minigameId),
+	});
+	if (!game) throw error(404, "Minigame not found");
 
-	const isOwner = session.user.id === minigame.userId;
+	const isOwner = session.user.id === game.userId;
 	const isAdmin = session.user.role === "admin";
-
-	if (!isOwner && !isAdmin)
+	if (!isOwner && !isAdmin) {
 		throw error(403, "You don't have permission to delete this minigame");
-
+	}
+	
 	try {
-		await unlink(path.join(UPLOAD_DIR, minigame.filePath));
+		await fs.unlink(path.join(UPLOAD_DIR, game.filePath));
 	} catch (err) {
 		console.error("Failed to delete file:", err);
 	}
 
-	db.prepare(`DELETE FROM minigame WHERE id = ?`).run(params.id);
-
-	const deleteCommand = db.prepare(`DELETE FROM collection_minigames WHERE minigameId = ?`);
-
-	const deleteTransaction = db.transaction((id: string) => {
-		deleteCommand.run(id);
+	await db.transaction(async (tx) => {
+		await tx.delete(minigame).where(eq(minigame.id, minigameId));
+		await tx.delete(collectionMinigames).where(eq(collectionMinigames.minigameId, minigameId));
 	});
-	
-	deleteTransaction(params.id);
 
 	return json({ success: true });
 };

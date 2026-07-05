@@ -1,5 +1,6 @@
 import { auth } from "$lib/server/auth/auth"
 import { db } from "$lib/server/db/db";
+import { collection, collectionMinigames } from "$lib/server/db/schema";
 import { error, json } from "@sveltejs/kit";
 import { randomUUID } from "crypto";
 import type { RequestHandler } from "./$types";
@@ -34,38 +35,24 @@ export const POST: RequestHandler = async ({ request }) => {
     const collectionId = randomUUID();
 
     try {
-        const createCollectionTransaction = db.transaction((
-            colId: string,
-            userId: string, 
-            colName: string, 
-            colDesc: string, 
-            colVis: string, 
-            gamesList: string[]
-        ) => {
-            db.prepare(`
-                INSERT INTO collection (id, userId, name, description, visibility)
-                VALUES (?, ?, ?, ?, ?)
-            `).run(colId, userId, colName, colDesc, colVis);
+        await db.transaction(async (tx) => {
+            await tx.insert(collection).values({
+                id: collectionId,
+                userId: session.user.id,
+                name,
+                description,
+                visibility: finalVisibility as "public" | "unlisted" | "private",
+            });
             
-            if (gamesList.length > 0) {
-                const insertJunction = db.prepare(`
-                    INSERT INTO collection_minigames (collection_id, minigameId)
-                    VALUES (?, ?)
-                `);
-                for (const minigameId of gamesList) {
-                    insertJunction.run(colId, minigameId);
+            if (minigameIds.length > 0) {
+                for (const minigameId of minigameIds) {
+                    await tx.insert(collectionMinigames).values({
+                        collectionId: collectionId,
+                        minigameId,
+                    });
                 }
             }
         });
-
-        createCollectionTransaction(
-            collectionId,
-            session.user.id,
-            name,
-            description,
-            finalVisibility,
-            minigameIds
-        );
 
         return json({ success: true, id: collectionId });
 

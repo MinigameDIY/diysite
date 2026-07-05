@@ -1,16 +1,21 @@
 import { db } from "$lib/server/db/db";
+import { user } from "$lib/server/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { error } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { requireAdmin } from "$lib/server/auth/require-admin";
 
 export const load: PageServerLoad = async () => {
-  const users = db.prepare(`SELECT id, name, email, role, createdAt FROM user ORDER BY createdAt DESC`).all();
+  const users = await db.query.user.findMany({
+    columns: { id: true, name: true, email: true, role: true, createdAt: true },
+    orderBy: [desc(user.createdAt)],
+  });
   return { users };
 };
 
 export const actions: Actions = {
   setRole: async ({ request }) => {
-    const session = requireAdmin(request);
+    const session = await requireAdmin(request);
 
     const formData = await request.formData();
     const userId = formData.get("userId")?.toString();
@@ -20,7 +25,7 @@ export const actions: Actions = {
       throw error(400, "Invalid input");
     }
 
-    db.prepare(`UPDATE user SET role = ? WHERE id = ?`).run(newRole, userId);
+    await db.update(user).set({ role: newRole }).where(eq(user.id, userId));
     return { success: true };
   },
 };

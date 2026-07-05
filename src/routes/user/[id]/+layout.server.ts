@@ -1,15 +1,16 @@
 import { db } from "$lib/server/db/db";
+import { user } from "$lib/server/db/schema";
+import { eq } from "drizzle-orm";
 import { error } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async ({ params }) => {
-  const user = db.prepare(`
-    SELECT id, name, email, createdAt
-    FROM user
-    WHERE id = ?
-  `).get(params.id) as any;
+  const profileUser = await db.query.user.findFirst({
+    where: eq(user.id, params.id),
+    columns: { id: true, name: true, email: true, createdAt: true },
+  });
 
-  if (!user) throw error(404, "User not found");
+  if (!profileUser) throw error(404, "User not found");
 
-  return { profileUser: user };
+  return { profileUser };
 };

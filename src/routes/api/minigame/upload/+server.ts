@@ -1,5 +1,6 @@
 import { auth } from "$lib/server/auth/auth"
 import { db } from "$lib/server/db/db";
+import { minigame } from "$lib/server/db/schema";
 import { error, json } from "@sveltejs/kit";
 import { randomUUID } from "crypto";
 import { writeFile, mkdir } from "fs/promises";
@@ -35,10 +36,14 @@ export const POST: RequestHandler = async ({ request }) => {
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(filePath, buffer);
 
-    db.prepare(`
-    INSERT INTO minigame (id, userId, name, description, filePath, visibility)
-    VALUES (?, ?, ?, ?, ?, ?)
-    `).run(id, session.user.id, name, description, storedFilename, finalVisibility);
+    await db.insert(minigame).values({
+        id,
+        userId: session.user.id,
+        name,
+        description,
+        filePath: storedFilename,
+        visibility: finalVisibility as "public" | "unlisted" | "private",
+    });
 
     return json({ success: true, id });
 };

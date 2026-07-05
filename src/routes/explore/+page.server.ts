@@ -1,23 +1,48 @@
 import { db } from "$lib/server/db/db";
+import { minigame, collection, user } from "$lib/server/db/schema";
+import { eq, desc, and } from "drizzle-orm";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async () => {
-    const minigames = db.prepare(`
-    SELECT minigame.id, minigame.name, minigame.description, minigame.createdAt, minigame.userId, user.name AS ownerName
-    FROM minigame
-    JOIN user ON user.id = minigame.userId
-    WHERE minigame.visibility = 'public'
-    ORDER BY minigame.createdAt DESC
-    LIMIT 25
-    `).all();
-  
-    const collections = db.prepare(`
-    SELECT collection.id, collection.name, collection.description, collection.createdAt, collection.userId, user.name AS ownerName
-    FROM collection
-    JOIN user ON user.id = collection.userId
-    WHERE collection.visibility = 'public'
-    ORDER BY collection.createdAt DESC
-    LIMIT 25
-    `).all();
-  return { minigames, collections };
+    const minigames = await db.query.minigame.findMany({
+        where: eq(minigame.visibility, 'public'),
+        orderBy: [desc(minigame.createdAt)],
+        limit: 25,
+        with: {
+            user: {
+                columns: { name: true }
+            }
+        }
+    });
+
+    const collections = await db.query.collection.findMany({
+        where: eq(collection.visibility, 'public'),
+        orderBy: [desc(collection.createdAt)],
+        limit: 25,
+        with: {
+            user: {
+                columns: { name: true }
+            }
+        }
+    });
+
+    const mappedMinigames = minigames.map(m => ({
+        id: m.id,
+        name: m.name,
+        description: m.description,
+        createdAt: m.createdAt,
+        userId: m.userId,
+        ownerName: m.user.name,
+    }));
+
+    const mappedCollections = collections.map(c => ({
+        id: c.id,
+        name: c.name,
+        description: c.description,
+        createdAt: c.createdAt,
+        userId: c.userId,
+        ownerName: c.user.name,
+    }));
+
+    return { minigames: mappedMinigames, collections: mappedCollections };
 };

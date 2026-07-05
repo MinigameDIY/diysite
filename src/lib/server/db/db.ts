@@ -1,34 +1,9 @@
-import Database from "better-sqlite3";
-import path from "path";
+import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import * as schema from './schema';
 
-export const db = new Database(path.resolve("store/sqlite.db"));
-db.pragma('foreign_keys = ON');
-db.exec(`
-  CREATE TABLE IF NOT EXISTS minigame (
-    id TEXT PRIMARY KEY,
-    userId TEXT NOT NULL,
-    name TEXT NOT NULL,
-    description TEXT,
-    filePath TEXT NOT NULL,
-    visibility TEXT NOT NULL DEFAULT 'private' CHECK (visibility IN ('public', 'unlisted', 'private')),
-    createdAt TEXT NOT NULL DEFAULT (datetime('now')),
-    FOREIGN KEY (userId) REFERENCES user(id)
-  );
+const sqlite = new Database('store/sqlite.db');
 
-  CREATE TABLE IF NOT EXISTS collection (
-      id TEXT PRIMARY KEY,
-      userId TEXT NOT NULL,
-      name TEXT NOT NULL,
-      description TEXT,
-      visibility TEXT NOT NULL DEFAULT 'private' CHECK (visibility IN ('public', 'unlisted', 'private')),
-      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (userId) REFERENCES user(id)
-  );
+sqlite.pragma('foreign_keys = ON');
 
-  CREATE TABLE IF NOT EXISTS collection_minigames (
-      collection_id TEXT,
-      minigameId TEXT,
-      PRIMARY KEY (collection_id, minigameId),
-      FOREIGN KEY (collection_id) REFERENCES collection(id) ON DELETE CASCADE
-  );
-`);
+export const db = drizzle(sqlite, { schema });

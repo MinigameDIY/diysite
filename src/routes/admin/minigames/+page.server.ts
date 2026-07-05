@@ -1,27 +1,36 @@
 import { db } from "$lib/server/db/db";
+import { minigame } from "$lib/server/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { error } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { requireAdmin } from "$lib/server/auth/require-admin";
 
 export const load: PageServerLoad = async () => {
-	const minigames = db
-		.prepare(
-			`
-			SELECT minigame.id, minigame.name, minigame.description, minigame.visibility,
-			       minigame.createdAt, minigame.userId, user.name AS ownerName
-			FROM minigame
-			JOIN user ON user.id = minigame.userId
-			ORDER BY minigame.createdAt DESC
-			`
-		)
-		.all();
+	const minigames = await db.query.minigame.findMany({
+		orderBy: [desc(minigame.createdAt)],
+		with: {
+			user: {
+				columns: { name: true }
+			}
+		}
+	});
 
-	return { minigames };
+	const mappedMinigames = minigames.map(m => ({
+		id: m.id,
+		name: m.name,
+		description: m.description,
+		visibility: m.visibility,
+		createdAt: m.createdAt,
+		userId: m.userId,
+		ownerName: m.user.name,
+	}));
+
+	return { minigames: mappedMinigames };
 };
 
 export const actions: Actions = {
 	setVisibility: async ({ request }) => {
-		requireAdmin(request);
+		await requireAdmin(request);
 		const formData = await request.formData();
 		const minigameId = formData.get("minigameId")?.toString();
 		const visibility = formData.get("visibility")?.toString();
@@ -30,7 +39,7 @@ export const actions: Actions = {
 			throw error(400, "Invalid input");
 		}
 
-		db.prepare(`UPDATE minigame SET visibility = ? WHERE id = ?`).run(visibility, minigameId);
+		await db.update(minigame).set({ visibility: visibility as "public" | "unlisted" | "private" }).where(eq(minigame.id, minigameId));
 		return { success: true };
 	},
 };

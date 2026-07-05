@@ -1,6 +1,7 @@
 import { auth } from "$lib/server/auth/auth"
 import { db } from "$lib/server/db/db";
-import { error, json } from "@sveltejs/kit";
+import { collection } from "$lib/server/db/schema";
+import { eq, desc, and } from "drizzle-orm";
 import type { RequestHandler } from "./$types";
 
 
@@ -10,18 +11,16 @@ export const GET: RequestHandler = async ({ params, request }) => {
 	const isOwner = session?.user.id === params.id;
 
  	const collections = isOwner
-    ? db.prepare(`
-        SELECT id
-        FROM collection
-        WHERE userId = ?
-        ORDER BY createdAt DESC
-      `).all(params.id)
-    : db.prepare(`
-        SELECT id
-        FROM collection
-        WHERE userId = ? AND visibility = 'public'
-        ORDER BY createdAt DESC
-      `).all(params.id);
+    ? await db.query.collection.findMany({
+        where: eq(collection.userId, params.id),
+        orderBy: [desc(collection.createdAt)],
+        columns: { id: true },
+      })
+    : await db.query.collection.findMany({
+        where: and(eq(collection.userId, params.id), eq(collection.visibility, 'public')),
+        orderBy: [desc(collection.createdAt)],
+        columns: { id: true },
+      });
 
 	return new Response(JSON.stringify(collections.map(item => item.id)));
 };
