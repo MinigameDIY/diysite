@@ -1,8 +1,5 @@
 <script lang="ts">
 	import { goto, invalidateAll } from "$app/navigation";
-	import MinigameCard from "$lib/components/MinigameCard.svelte";
-	import { DIYPlayer } from "diyplayer";
-	import { onMount } from "svelte";
 
 	interface Props {
 		element: {
@@ -33,6 +30,8 @@
 	let editName = $state("");
 	let editDescription = $state("");
 	let editVisibility = $state("");
+	let editMinigameIds = $state<string[]>([]);
+
 	let saving = $state(false);
 	let saveError = $state("");
 
@@ -40,8 +39,30 @@
 		editName = element.name;
 		editDescription = element.description ?? "";
 		editVisibility = element.visibility ?? "private";
+
+		console.log(element);
+
+		if (elementType === "collection")
+			editMinigameIds = [...element.minigames];
+
 		editing = true;
 		saveError = "";
+	}
+
+
+	let currentIdInput = $state("");
+
+	function addMinigameId() {
+		const cleanId = currentIdInput.trim();
+		if (cleanId && !editMinigameIds.includes(cleanId)) {
+			editMinigameIds = [...editMinigameIds, cleanId];
+		}
+
+		currentIdInput = "";
+	}
+
+	function removeMinigameId(indexToRemove: number) {
+		editMinigameIds = editMinigameIds.filter((_, index) => index !== indexToRemove);
 	}
 
 	async function handleSave() {
@@ -55,6 +76,7 @@
 				name: editName,
 				description: editDescription,
 				visibility: editVisibility,
+				minigames: editMinigameIds
 			}),
 		});
 
@@ -62,7 +84,7 @@
 
 		if (res.ok) {
 			editing = false;
-			await invalidateAll();
+			window.location.reload();
 		} else {
 			const err = await res.json().catch(() => ({}));
 			saveError = err.message ?? "Failed to save changes";
@@ -121,6 +143,33 @@
 						>Cancel</button
 					>
 				</div>
+				
+				{#if elementType === "collection"}
+					<label>
+						Add Minigame IDs
+						<div>
+							<input 
+								type="text" 
+								placeholder="Paste minigame ID..." 
+								bind:value={currentIdInput}
+								onkeydown={(e) => e.key === "Enter" && (e.preventDefault(), addMinigameId())}
+							/>
+							<button type="button" onclick={addMinigameId}>Add</button>
+						</div>
+					</label>
+
+
+					{#if editMinigameIds.length > 0}
+						<ul>
+							{#each editMinigameIds as id, index}
+								<li>
+									{id}
+									<button type="button" onclick={() => removeMinigameId(index)}>&times;</button>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				{/if}
 
 				{#if saveError}
 					<p class="error">{saveError}</p>
@@ -154,7 +203,7 @@
 			{#if isOwner && canEdit}
 				<div class="owner-actions">
 					<button onclick={startEditing}>Edit</button>
-					<button onclick={handleDelete} class="delete-btn">Delete collection</button>
+					<button onclick={handleDelete} class="delete-btn">Delete ${elementType}</button>
 				</div>
 			{/if}
 		{/if}

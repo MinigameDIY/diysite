@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto, invalidateAll } from "$app/navigation";
 	import InfoCard from "$lib/components/InfoCard.svelte";
 	import MinigameCard from "$lib/components/MinigameCard.svelte";
 	import { DIYPlayer } from "diyplayer";

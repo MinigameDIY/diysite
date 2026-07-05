@@ -52,13 +52,27 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 	const collection = db
 		.prepare(`SELECT * FROM collection WHERE id = ?`)
 		.get(params.id) as any;
+	
 	if (!collection) throw error(404, "collection not found");
+
+
+	const collection_minigames = db
+	.prepare(`
+    SELECT collection_minigames.*
+    FROM collection_minigames
+    JOIN collection ON collection.id = collection_minigames.collection_id
+    WHERE collection_minigames.collection_id = ?
+  	`,).all(params.id) as any[];
+
+	if (!collection_minigames) throw error(404, "collection_minigames not found");
+
 
 	const isOwner = session.user.id === collection.userId;
 	const isAdmin = session.user.role === "admin";
 	if (!isOwner && !isAdmin) {
 		throw error(403, "You don't have permission to edit this collection");
 	}
+
 
 	const body = await request.json();
 
@@ -83,6 +97,45 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 		}
 		updates.push("visibility = ?");
 		values.push(body.visibility);
+	}
+
+	if (body.minigames !== undefined) {
+		if (!Array.isArray(body.minigames)) {
+			throw error(400, "Invalid minigames array type");
+		}
+
+		
+		if (body.minigames.length > 0) {
+			const collection_minigame_ids = collection_minigames.map(item => item.minigameId);
+
+			const toRemove = collection_minigame_ids.filter((value: string) => !body.minigames.includes(value));
+			const toAdd = body.minigames.filter((value: string) => !collection_minigame_ids.includes(value));
+
+			if (toRemove.length > 0) {
+				const deleteCommand = db.prepare(`DELETE FROM collection_minigames WHERE collection_id = ? AND minigameId = ?`);
+	
+				const deleteTransaction = db.transaction((ids: string) => {
+					for (const id of ids) {
+						deleteCommand.run(params.id, id);
+					}
+				});
+				
+				deleteTransaction(toRemove);
+			}
+
+			if (toAdd.length > 0) {
+				const addCommand = db.prepare(`INSERT INTO collection_minigames (collection_id, minigameId)
+                    VALUES (?, ?)`);
+	
+				const addTransaction = db.transaction((ids: string) => {
+					for (const id of ids) {
+						addCommand.run(params.id, id);
+					}
+				});
+
+				addTransaction(toAdd);
+			}
+		}
 	}
 
 	if (updates.length === 0) {

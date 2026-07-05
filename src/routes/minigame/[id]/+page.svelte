@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto, invalidateAll } from "$app/navigation";
 	import InfoCard from "$lib/components/InfoCard.svelte";
 	import { DIYPlayer } from "diyplayer";
 	import { onMount } from "svelte";
@@ -27,61 +26,6 @@
 			console.log(e);
 		}
 	})
-
-	let editing = $state(false);
-	let editName = $state("");
-	let editDescription = $state("");
-	let editVisibility = $state("");
-	let saving = $state(false);
-	let saveError = $state("");
-
-	function startEditing() {
-		editName = minigame.name;
-		editDescription = minigame.description ?? "";
-		editVisibility = minigame.visibility;
-		editing = true;
-		saveError = "";
-	}
-
-	async function handleSave() {
-		saving = true;
-		saveError = "";
-
-		const res = await fetch(`/api/minigame/${minigame.id}`, {
-			method: "PATCH",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				name: editName,
-				description: editDescription,
-				visibility: editVisibility,
-			}),
-		});
-
-		saving = false;
-
-		if (res.ok) {
-			editing = false;
-			await invalidateAll();
-		} else {
-			const err = await res.json().catch(() => ({}));
-			saveError = err.message ?? "Failed to save changes";
-		}
-	}
-
-	async function handleDelete() {
-		if (!confirm("Delete this minigame? This can't be undone.")) return;
-
-		const res = await fetch(`/api/minigame/${minigame.id}/delete`, {
-			method: "DELETE",
-		});
-
-		if (res.ok) {
-			goto("/user/" + minigame.ownerId + "/minigames");
-		} else {
-			const err = await res.json().catch(() => ({}));
-			alert(err.message ?? "Failed to delete minigame");
-		}
-	}
 </script>
 
 
