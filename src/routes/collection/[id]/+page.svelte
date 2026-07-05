@@ -6,9 +6,9 @@
 
 	let { data } = $props();
 	let user = $derived(data.user);
-	let id = $derived(data.id)
+	let id = $derived(data.id);
 	let collection = $state({});
-	let collection_minigames = $state([])
+	let collection_minigames = $state([]);
 	let isOwner = $state(false);
 
 	let diyUrls: string[] = $state([]);
@@ -16,46 +16,52 @@
 	onMount(async () => {
 		try {
 			const res = await fetch(`/api/collection/${id}?includeMinigames`, {
-				method: "GET"
+				method: "GET",
 			});
 
 			if (res.ok) {
 				const result = await res.json();
 				collection = result;
-				isOwner = collection.ownerId === user?.id
-				collection_minigames = collection.minigames
+				isOwner = collection.ownerId === user?.id;
+				collection_minigames = collection.minigames;
 			}
-
-		} catch(e) {
+		} catch (e) {
 			// TODO: add error that shows up
 			console.log(e);
 		}
 
-		
 		for (minigame of collection_minigames) {
-			diyUrls.push(`/api/minigame/${minigame.id}/download`)
+			diyUrls.push(`/api/minigame/${minigame.id}/download`);
 		}
-	})
+	});
 </script>
-
 
 <div class="row-container">
 	<div class="column-container">
-		<DIYPlayer projectUrls={diyUrls}/>
+		<DIYPlayer projectUrls={diyUrls} />
 	</div>
 	<div class="column-container">
-		<ElementInfo element={collection} elementType="collection" showOwner={true} isOwner={isOwner} showVisibility={isOwner} canEdit={true} />
+		<ElementInfo
+			element={collection}
+			elementType="collection"
+			showOwner={true}
+			{isOwner}
+			showVisibility={isOwner}
+			canEdit={true}
+		/>
 
 		<div class="minigame-container">
 			{#each collection_minigames as minigame}
-				<ElementCard element={minigame} elementType="minigame" showOwner={true} showVisibility={minigame?.isOwner ?? false} />
+				<ElementCard
+					element={minigame}
+					elementType="minigame"
+					showOwner={true}
+					showVisibility={minigame?.isOwner ?? false}
+				/>
 			{/each}
 		</div>
 	</div>
 </div>
-
-
-
 
 <style>
 	.minigame-container {
@@ -65,7 +71,7 @@
 
 	.row-container {
 		display: flex;
-		flex-direction: row; 
+		flex-direction: row;
 		gap: 20px;
 	}
 

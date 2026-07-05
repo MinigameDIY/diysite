@@ -10,12 +10,12 @@ export const load: PageServerLoad = async () => {
 		orderBy: [desc(minigame.createdAt)],
 		with: {
 			user: {
-				columns: { name: true }
-			}
-		}
+				columns: { name: true },
+			},
+		},
 	});
 
-	const mappedMinigames = minigames.map(m => ({
+	const mappedMinigames = minigames.map((m) => ({
 		id: m.id,
 		name: m.name,
 		description: m.description,
@@ -35,11 +35,19 @@ export const actions: Actions = {
 		const minigameId = formData.get("minigameId")?.toString();
 		const visibility = formData.get("visibility")?.toString();
 
-		if (!minigameId || !["public", "private", "unlisted"].includes(visibility ?? "")) {
+		if (
+			!minigameId ||
+			!["public", "private", "unlisted"].includes(visibility ?? "")
+		) {
 			throw error(400, "Invalid input");
 		}
 
-		await db.update(minigame).set({ visibility: visibility as "public" | "unlisted" | "private" }).where(eq(minigame.id, minigameId));
+		await db
+			.update(minigame)
+			.set({
+				visibility: visibility as "public" | "unlisted" | "private",
+			})
+			.where(eq(minigame.id, minigameId));
 		return { success: true };
 	},
 };

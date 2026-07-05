@@ -39,7 +39,9 @@
 		{#if showVisibility && element.visibility}
 			<span class="badge">{element.visibility}</span>
 		{/if}
-		<span class="date">{new Date(element.createdAt).toLocaleDateString()}</span>
+		<span class="date"
+			>{new Date(element.createdAt).toLocaleDateString()}</span
+		>
 	</p>
 </div>
 

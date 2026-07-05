@@ -5,12 +5,12 @@ import { error } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async ({ params }) => {
-  const profileUser = await db.query.user.findFirst({
-    where: eq(user.id, params.id),
-    columns: { id: true, name: true, email: true, createdAt: true },
-  });
+	const profileUser = await db.query.user.findFirst({
+		where: eq(user.id, params.id),
+		columns: { id: true, name: true, email: true, createdAt: true },
+	});
 
-  if (!profileUser) throw error(404, "User not found");
+	if (!profileUser) throw error(404, "User not found");
 
-  return { profileUser };
+	return { profileUser };
 };

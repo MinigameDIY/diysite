@@ -23,7 +23,7 @@
 		elementType,
 		showOwner = true,
 		isOwner = false,
-		canEdit = false
+		canEdit = false,
 	}: Props = $props();
 
 	let editing = $state(false);
@@ -47,7 +47,6 @@
 		saveError = "";
 	}
 
-
 	let currentIdInput = $state("");
 
 	function addMinigameId() {
@@ -60,7 +59,9 @@
 	}
 
 	function removeMinigameId(indexToRemove: number) {
-		editMinigameIds = editMinigameIds.filter((_, index) => index !== indexToRemove);
+		editMinigameIds = editMinigameIds.filter(
+			(_, index) => index !== indexToRemove,
+		);
 	}
 
 	async function handleSave() {
@@ -74,7 +75,7 @@
 				name: editName,
 				description: editDescription,
 				visibility: editVisibility,
-				minigames: editMinigameIds
+				minigames: editMinigameIds,
 			}),
 		});
 
@@ -112,8 +113,8 @@
 				onsubmit={(e) => {
 					e.preventDefault();
 					handleSave();
-				}}>
-				
+				}}
+			>
 				<label>
 					Name
 					<input type="text" bind:value={editName} required />
@@ -141,28 +142,35 @@
 						>Cancel</button
 					>
 				</div>
-				
+
 				{#if elementType === "collection"}
 					<label>
 						Add Minigame IDs
 						<div>
-							<input 
-								type="text" 
-								placeholder="Paste minigame ID..." 
+							<input
+								type="text"
+								placeholder="Paste minigame ID..."
 								bind:value={currentIdInput}
-								onkeydown={(e) => e.key === "Enter" && (e.preventDefault(), addMinigameId())}
+								onkeydown={(e) =>
+									e.key === "Enter" &&
+									(e.preventDefault(), addMinigameId())}
 							/>
-							<button type="button" onclick={addMinigameId}>Add</button>
+							<button type="button" onclick={addMinigameId}
+								>Add</button
+							>
 						</div>
 					</label>
-
 
 					{#if editMinigameIds.length > 0}
 						<ul>
 							{#each editMinigameIds as id, index}
 								<li>
 									{id}
-									<button type="button" onclick={() => removeMinigameId(index)}>&times;</button>
+									<button
+										type="button"
+										onclick={() => removeMinigameId(index)}
+										>&times;</button
+									>
 								</li>
 							{/each}
 						</ul>
@@ -195,13 +203,18 @@
 				{#if isOwner && element.visibility}
 					<span class="badge">{element.visibility}</span>
 				{/if}
-				<span class="date">{new Date(element.createdAt).toLocaleDateString()} {new Date(element.createdAt).toLocaleTimeString()}</span>
+				<span class="date"
+					>{new Date(element.createdAt).toLocaleDateString()}
+					{new Date(element.createdAt).toLocaleTimeString()}</span
+				>
 			</p>
 
 			{#if isOwner && canEdit}
 				<div class="owner-actions">
 					<button onclick={startEditing}>Edit</button>
-					<button onclick={handleDelete} class="delete-btn">Delete {elementType}</button>
+					<button onclick={handleDelete} class="delete-btn"
+						>Delete {elementType}</button
+					>
 				</div>
 			{/if}
 		{/if}
@@ -231,7 +244,7 @@
 		padding: 0.15rem 0.5rem;
 		border-radius: 4px;
 	}
-    
+
 	.delete-btn {
 		color: #b00;
 		background: none;

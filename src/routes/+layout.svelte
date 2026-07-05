@@ -1,5 +1,5 @@
 <script lang="ts">
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from "$lib/assets/favicon.svg";
 	import { authClient } from "$lib/client/auth-client";
 
 	const session = authClient.useSession();

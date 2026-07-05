@@ -9,26 +9,28 @@
 	let minigames = $state({});
 	let collections = $state({});
 	onMount(async () => {
+		for (const element of ["minigame", "collection"]) {
+			try {
+				const res = await fetch(
+					`/api/feed?feed=date&element=${element}`,
+					{
+						method: "GET",
+					},
+				);
 
-    for (const element of ['minigame', 'collection']) {
-      try {
-        const res = await fetch(`/api/feed?feed=date&element=${element}`, {
-          method: "GET",
-        });
-  
-        if (res.ok) {
-          const result = await res.json();
-          if (element === 'minigame'){
-            minigames = result;
-          } else {
-            collections = result;
-          }
-        }
-      } catch (e) {
-        // TODO: add error that shows up
-        console.log(e);
-      }
-    }
+				if (res.ok) {
+					const result = await res.json();
+					if (element === "minigame") {
+						minigames = result;
+					} else {
+						collections = result;
+					}
+				}
+			} catch (e) {
+				// TODO: add error that shows up
+				console.log(e);
+			}
+		}
 	});
 </script>
 

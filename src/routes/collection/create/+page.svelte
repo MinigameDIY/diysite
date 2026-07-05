@@ -3,7 +3,7 @@
 
 	let error = $state("");
 	let submitting = $state(false);
-	
+
 	let minigameIds = $state<string[]>([]);
 	let currentIdInput = $state("");
 
@@ -74,11 +74,12 @@
 	<label>
 		Add Minigame IDs
 		<div>
-			<input 
-				type="text" 
-				placeholder="Paste minigame ID..." 
+			<input
+				type="text"
+				placeholder="Paste minigame ID..."
 				bind:value={currentIdInput}
-				onkeydown={(e) => e.key === "Enter" && (e.preventDefault(), addMinigameId())}
+				onkeydown={(e) =>
+					e.key === "Enter" && (e.preventDefault(), addMinigameId())}
 			/>
 			<button type="button" onclick={addMinigameId}>Add</button>
 		</div>
@@ -89,7 +90,10 @@
 			{#each minigameIds as id, index}
 				<li>
 					{id}
-					<button type="button" onclick={() => removeMinigameId(index)}>&times;</button>
+					<button
+						type="button"
+						onclick={() => removeMinigameId(index)}>&times;</button
+					>
 				</li>
 			{/each}
 		</ul>

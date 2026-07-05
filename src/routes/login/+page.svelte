@@ -28,24 +28,24 @@
 </script>
 
 {#if $session.data}
-  <p style="color: red">You are already logged in!</p>
-  <button onclick={handleLogout}>Log Out</button> 
+	<p style="color: red">You are already logged in!</p>
+	<button onclick={handleLogout}>Log Out</button>
 {:else}
-  <form
-    onsubmit={(e) => {
-      e.preventDefault();
-      handleLogIn();
-    }}
-  >
-    <input type="email" bind:value={email} placeholder="Email" required />
-    <input
-      type="password"
-      bind:value={password}
-      placeholder="Password"
-      required
-    />
-    <button type="submit">Log In</button>
-  </form>
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			handleLogIn();
+		}}
+	>
+		<input type="email" bind:value={email} placeholder="Email" required />
+		<input
+			type="password"
+			bind:value={password}
+			placeholder="Password"
+			required
+		/>
+		<button type="submit">Log In</button>
+	</form>
 {/if}
 
 {#if error}

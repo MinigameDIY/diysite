@@ -14,7 +14,7 @@
 	<p>Hi {$session.data.user.name}!</p>
 	<a href="/minigame/upload">Upload Project</a>
 	<a href="/collection/create">Create Collection</a>
-	<button onclick={handleLogout}>Log Out</button> 
+	<button onclick={handleLogout}>Log Out</button>
 {:else}
 	<a href="/login">Log in</a> or <a href="/signup">Sign up</a>
 {/if}

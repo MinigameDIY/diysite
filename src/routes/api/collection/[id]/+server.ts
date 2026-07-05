@@ -1,6 +1,10 @@
-import { auth } from "$lib/server/auth/auth"
+import { auth } from "$lib/server/auth/auth";
 import { db } from "$lib/server/db/db";
-import { collection, collectionMinigames, minigame } from "$lib/server/db/schema";
+import {
+	collection,
+	collectionMinigames,
+	minigame,
+} from "$lib/server/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
@@ -9,7 +13,7 @@ import { requireLogin } from "$lib/server/auth/require-login";
 
 export const GET: RequestHandler = async ({ url, params, request }) => {
 	const collectionId = params.id;
-	const shouldIncludeMinigames = url.searchParams.has('includeMinigames');
+	const shouldIncludeMinigames = url.searchParams.has("includeMinigames");
 
 	const session = await auth.api.getSession({ headers: request.headers });
 
@@ -17,9 +21,9 @@ export const GET: RequestHandler = async ({ url, params, request }) => {
 		where: eq(collection.id, collectionId),
 		with: {
 			user: {
-				columns: { id: true, name: true }
-			}
-		}
+				columns: { id: true, name: true },
+			},
+		},
 	});
 
 	if (!coll) throw error(404, "Collection not found");
@@ -34,9 +38,12 @@ export const GET: RequestHandler = async ({ url, params, request }) => {
 		where: eq(collectionMinigames.collectionId, collectionId),
 	});
 
-	if (!collection_minigames) throw error(404, "collection_minigames not found");
+	if (!collection_minigames)
+		throw error(404, "collection_minigames not found");
 
-	let finalMinigames: any = collection_minigames.map(item => item.minigameId);
+	let finalMinigames: any = collection_minigames.map(
+		(item) => item.minigameId,
+	);
 	if (shouldIncludeMinigames) {
 		finalMinigames = await getMinigames(finalMinigames, session);
 	}
@@ -56,29 +63,31 @@ export const GET: RequestHandler = async ({ url, params, request }) => {
 	return new Response(JSON.stringify(result));
 };
 
-async function getMinigames(minigameIdList: string[], session: any): Promise<any> {
+async function getMinigames(
+	minigameIdList: string[],
+	session: any,
+): Promise<any> {
 	const minigames = await db.query.minigame.findMany({
 		where: inArray(minigame.id, minigameIdList),
 		with: {
 			user: {
-				columns: { id: true, name: true }
-			}
-		}
+				columns: { id: true, name: true },
+			},
+		},
 	});
 
-	const filtered = minigames.filter(g => {
+	const filtered = minigames.filter((g) => {
 		const isOwner = session?.user.id === g.userId;
 		return g.visibility !== "private" || isOwner;
 	});
 
-	
-	const mapped = filtered.map(g => ({
+	const mapped = filtered.map((g) => ({
 		...g,
 		ownerId: g.user.id,
 		ownerName: g.user.name,
-		user: undefined
+		user: undefined,
 	}));
-	
+
 	return mapped;
 }
 
@@ -95,7 +104,8 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 		where: eq(collectionMinigames.collectionId, params.id),
 	});
 
-	if (!collection_minigames) throw error(404, "collection_minigames not found");
+	if (!collection_minigames)
+		throw error(404, "collection_minigames not found");
 
 	const isOwner = session.user.id === coll.userId;
 	const isAdmin = session.user.role === "admin";
@@ -130,16 +140,31 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 		}
 
 		if (body.minigames.length > 0) {
-			const collection_minigame_ids = collection_minigames.map(item => item.minigameId).filter((id): id is string => id !== null);
+			const collection_minigame_ids = collection_minigames
+				.map((item) => item.minigameId)
+				.filter((id): id is string => id !== null);
 
-			const toRemove = collection_minigame_ids.filter((value) => !body.minigames.includes(value));
-			const toAdd = body.minigames.filter((value: string) => !collection_minigame_ids.includes(value));
+			const toRemove = collection_minigame_ids.filter(
+				(value) => !body.minigames.includes(value),
+			);
+			const toAdd = body.minigames.filter(
+				(value: string) => !collection_minigame_ids.includes(value),
+			);
 
 			if (toRemove.length > 0) {
 				await db.transaction(async (tx) => {
 					for (const id of toRemove) {
-						await tx.delete(collectionMinigames)
-							.where(and(eq(collectionMinigames.collectionId, params.id), eq(collectionMinigames.minigameId, id!)));
+						await tx
+							.delete(collectionMinigames)
+							.where(
+								and(
+									eq(
+										collectionMinigames.collectionId,
+										params.id,
+									),
+									eq(collectionMinigames.minigameId, id!),
+								),
+							);
 					}
 				});
 			}
@@ -147,7 +172,12 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 			if (toAdd.length > 0) {
 				await db.transaction(async (tx) => {
 					for (const id of toAdd) {
-						await tx.insert(collectionMinigames).values({ collectionId: params.id, minigameId: id });
+						await tx
+							.insert(collectionMinigames)
+							.values({
+								collectionId: params.id,
+								minigameId: id,
+							});
 					}
 				});
 			}
@@ -155,7 +185,10 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 	}
 
 	if (Object.keys(updates).length > 0) {
-		await db.update(collection).set(updates).where(eq(collection.id, params.id));
+		await db
+			.update(collection)
+			.set(updates)
+			.where(eq(collection.id, params.id));
 	}
 
 	const updated = await db.query.collection.findFirst({

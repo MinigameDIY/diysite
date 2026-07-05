@@ -4,7 +4,7 @@
 
 	let { data } = $props();
 	let collectionIds = $state([]);
-  let collections = $state([]);
+	let collections = $state([]);
 
 	onMount(async () => {
 		try {
@@ -22,22 +22,21 @@
 			console.log(e);
 		}
 
-    if (collectionIds.length > 0) {
-        collectionIds.forEach(async (collectionId) => {
-        try {
-          const res = await fetch(`/api/collection/${collectionId}`, {
-            method: "GET"
-          });
-  
-          if (res.ok) {
-            const result = await res.json();
-            collections.push(result);
-          }
-  
-        } catch(e) {
-          console.log(e);
-        }
-      })
+		if (collectionIds.length > 0) {
+			collectionIds.forEach(async (collectionId) => {
+				try {
+					const res = await fetch(`/api/collection/${collectionId}`, {
+						method: "GET",
+					});
+
+					if (res.ok) {
+						const result = await res.json();
+						collections.push(result);
+					}
+				} catch (e) {
+					console.log(e);
+				}
+			});
 		}
 	});
 </script>

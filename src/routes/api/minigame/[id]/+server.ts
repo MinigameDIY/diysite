@@ -4,7 +4,10 @@ import { minigame, collectionMinigames } from "$lib/server/db/schema"; // Import
 import { eq } from "drizzle-orm";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { VALID_VISIBILITIES, UPLOAD_DIR } from "$lib/server/storage/upload-utils";
+import {
+	VALID_VISIBILITIES,
+	UPLOAD_DIR,
+} from "$lib/server/storage/upload-utils";
 import { requireLogin } from "$lib/server/auth/require-login";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -14,14 +17,14 @@ export const GET: RequestHandler = async ({ params, request }) => {
 	if (!minigameId) throw error(400, "Missing ID");
 
 	const session = await auth.api.getSession({ headers: request.headers });
-	
+
 	const game = await db.query.minigame.findFirst({
 		where: eq(minigame.id, minigameId),
 		with: {
 			user: {
-				columns: { id: true, name: true }
-			}
-		}
+				columns: { id: true, name: true },
+			},
+		},
 	});
 
 	if (!game) throw error(404, "minigame not found");
@@ -36,7 +39,7 @@ export const GET: RequestHandler = async ({ params, request }) => {
 		...game,
 		ownerId: game.user.id,
 		ownerName: game.user.name,
-		user: undefined
+		user: undefined,
 	});
 };
 
@@ -57,7 +60,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 	}
 
 	const body = await request.json();
-	
+
 	const updateFields: Partial<typeof minigame.$inferInsert> = {};
 
 	if (body.name !== undefined) {
@@ -80,7 +83,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 	if (Object.keys(updateFields).length === 0) {
 		throw error(400, "No valid fields provided to update");
 	}
-	
+
 	const [updatedGame] = await db
 		.update(minigame)
 		.set(updateFields)
@@ -105,7 +108,7 @@ export const DELETE: RequestHandler = async ({ params, request }) => {
 	if (!isOwner && !isAdmin) {
 		throw error(403, "You don't have permission to delete this minigame");
 	}
-	
+
 	try {
 		await fs.unlink(path.join(UPLOAD_DIR, game.filePath));
 	} catch (err) {
@@ -114,7 +117,9 @@ export const DELETE: RequestHandler = async ({ params, request }) => {
 
 	await db.transaction(async (tx) => {
 		await tx.delete(minigame).where(eq(minigame.id, minigameId));
-		await tx.delete(collectionMinigames).where(eq(collectionMinigames.minigameId, minigameId));
+		await tx
+			.delete(collectionMinigames)
+			.where(eq(collectionMinigames.minigameId, minigameId));
 	});
 
 	return json({ success: true });

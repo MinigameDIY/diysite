@@ -1,13 +1,13 @@
-import { auth } from "$lib/server/auth/auth"
+import { auth } from "$lib/server/auth/auth";
 import { db } from "$lib/server/db/db";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ params, request }) => {
-    const session = await auth.api.getSession({ headers: request.headers });
+	const session = await auth.api.getSession({ headers: request.headers });
 
-    const user = session?.user;
-    const id = params.id;
+	const user = session?.user;
+	const id = params.id;
 
-    return { id, user };
+	return { id, user };
 };
