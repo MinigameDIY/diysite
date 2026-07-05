@@ -40,8 +40,6 @@
 		editDescription = element.description ?? "";
 		editVisibility = element.visibility ?? "private";
 
-		console.log(element);
-
 		if (elementType === "collection")
 			editMinigameIds = [...element.minigames];
 
