@@ -6,44 +6,58 @@ import { VALID_VISIBILITIES } from "$lib/server/upload-utils";
 import { requireLogin } from "$lib/server/require-login";
 
 export const GET: RequestHandler = async ({ params, request }) => {
-	const minigameId = params.id;
+	const collectionId = params.id;
 
 	const session = await auth.api.getSession({ headers: request.headers });
 
-	const minigame = db
+	const collection = db
 		.prepare(
 			`
-	SELECT minigame.*, user.id AS ownerId, user.name AS ownerName
-	FROM minigame
-	JOIN user ON user.id = minigame.userId
-	WHERE minigame.id = ?
+	SELECT collection.*, user.id AS ownerId, user.name AS ownerName
+	FROM collection
+	JOIN user ON user.id = collection.userId
+	WHERE collection.id = ?
 	`,
 		)
-		.get(minigameId) as any;
+		.get(collectionId) as any;
 
-	if (!minigame) throw error(404, "minigame not found");
+	const collection_minigames = db
+		.prepare(
+			`
+    SELECT collection_minigames.*
+    FROM collection_minigames
+    JOIN collection ON collection.id = collection_minigames.collection_id
+    WHERE collection_minigames.collection_id = ?
+  `,
+		)
+		.all(params.id) as any[];
 
-	const isOwner = session?.user.id === minigame.userId;
 
-	if (minigame.visibility === "private" && !isOwner) {
-		throw error(403, "This minigame is private");
+	if (!collection || !collection_minigames) throw error(404, "Collection not found");
+
+	const isOwner = session?.user.id === collection.userId;
+
+	if (collection.visibility === "private" && !isOwner) {
+		throw error(403, "This collection is private");
 	}
 
-	return new Response(JSON.stringify(minigame));
+	collection.minigames = collection_minigames.map(item => item.minigameId);
+
+	return new Response(JSON.stringify(collection));
 };
 
 export const PATCH: RequestHandler = async ({ params, request }) => {
 	const session = await requireLogin(request);
 
-	const minigame = db
-		.prepare(`SELECT * FROM minigame WHERE id = ?`)
+	const collection = db
+		.prepare(`SELECT * FROM collection WHERE id = ?`)
 		.get(params.id) as any;
-	if (!minigame) throw error(404, "Minigame not found");
+	if (!collection) throw error(404, "collection not found");
 
-	const isOwner = session.user.id === minigame.userId;
+	const isOwner = session.user.id === collection.userId;
 	const isAdmin = session.user.role === "admin";
 	if (!isOwner && !isAdmin) {
-		throw error(403, "You don't have permission to edit this minigame");
+		throw error(403, "You don't have permission to edit this collection");
 	}
 
 	const body = await request.json();
@@ -79,15 +93,15 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 
 	db.prepare(
 		`
-    UPDATE minigame
-    SET ${updates.join(", ")}
-    WHERE id = ?
+	UPDATE collection
+	SET ${updates.join(", ")}
+	WHERE id = ?
   `,
 	).run(...values);
 
 	const updated = db
-		.prepare(`SELECT * FROM minigame WHERE id = ?`)
+		.prepare(`SELECT * FROM collection WHERE id = ?`)
 		.get(params.id);
 
-	return json({ success: true, minigame: updated });
+	return json({ success: true, collection: updated });
 };

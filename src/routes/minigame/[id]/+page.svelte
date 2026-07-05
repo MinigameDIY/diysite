@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from "$app/navigation";
+	import InfoCard from "$lib/components/InfoCard.svelte";
 	import { DIYPlayer } from "diyplayer";
 	import { onMount } from "svelte";
 
@@ -17,7 +18,6 @@
 
 			if (res.ok) {
 				const result = await res.json();
-				console.log(result);
 				minigame = result;
 				isOwner = minigame.ownerId === session?.user.id
 			}
@@ -84,128 +84,29 @@
 	}
 </script>
 
-<DIYPlayer projectUrls={[`/api/minigame/${minigame.id}/download`]} />
 
-<article>
-	{#if editing}
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				handleSave();
-			}}
-		>
-			<label>
-				Name
-				<input type="text" bind:value={editName} required />
-			</label>
 
-			<label>
-				Description
-				<textarea bind:value={editDescription}></textarea>
-			</label>
-
-			<label>
-				Visibility
-				<select bind:value={editVisibility}>
-					<option value="private">Private</option>
-					<option value="unlisted">Unlisted</option>
-					<option value="public">Public</option>
-				</select>
-			</label>
-
-			<div class="edit-actions">
-				<button type="submit" disabled={saving}>
-					{saving ? "Saving..." : "Save"}
-				</button>
-				<button type="button" onclick={() => (editing = false)}
-					>Cancel</button
-				>
-			</div>
-
-			{#if saveError}
-				<p class="error">{saveError}</p>
-			{/if}
-		</form>
-	{:else}
-		<h1>{minigame.name}</h1>
-
-		<p class="owner">
-			by <a href={`/user/${minigame.ownerId}/profile`}
-				>{minigame.ownerName}</a
-			>
-			{#if isOwner}
-				(you!)
-			{/if}
-		</p>
-
-		{#if isOwner}
-			<span class="badge">{minigame.visibility}</span>
-		{/if}
-
-		{#if minigame.description}
-			<p class="description">{minigame.description}</p>
-		{/if}
-
-		<p class="date">
-			Uploaded {new Date(minigame.createdAt).toLocaleDateString()}
-		</p>
-
-		<a href={`/api/minigame/${minigame.id}/download`} class="download-btn"
-			>Download .sb3</a
-		>
-
-		{#if isOwner}
-			<div class="owner-actions">
-				<button onclick={startEditing}>Edit</button>
-				<button onclick={handleDelete} class="delete-btn"
-					>Delete minigame</button
-				>
-			</div>
-		{/if}
-	{/if}
-</article>
+<div class="row-container">
+	<div class="column-container">
+		<DIYPlayer projectUrls={[`/api/minigame/${minigame.id}/download`]} />
+	</div>
+	<div class="column-container">
+		<InfoCard element={minigame} elementType="minigame" showOwner={true} isOwner={isOwner} showVisibility={isOwner} canEdit={true} />
+	</div>
+</div>
 
 <style>
-	article {
-		max-width: 600px;
-		margin: 0 auto;
-	}
-	.owner {
-		color: #666;
-		font-size: 0.9rem;
-	}
-	.badge {
-		background: #eee;
-		padding: 0.15rem 0.5rem;
-		border-radius: 4px;
-		font-size: 0.8rem;
-	}
-	.description {
-		margin: 1rem 0;
-	}
-	.date {
-		font-size: 0.85rem;
-		color: #888;
-	}
-	.download-btn {
-		display: inline-block;
-		margin-top: 1rem;
-	}
-	.owner-actions {
+	.row-container {
 		display: flex;
-		gap: 0.5rem;
-		margin-top: 1rem;
+		flex-direction: row; 
+		gap: 20px;
 	}
-	.delete-btn {
-		color: #b00;
-		background: none;
-		border: 1px solid #b00;
-		border-radius: 4px;
-		padding: 0.15rem 0.5rem;
-		cursor: pointer;
-	}
-	.error {
-		color: #b00;
-		font-size: 0.85rem;
+
+	.column-container {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		flex: 1;
+		min-width: 0;
 	}
 </style>

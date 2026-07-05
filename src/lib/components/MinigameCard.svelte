@@ -16,7 +16,7 @@
 	let {
 		minigame,
 		showVisibility = false,
-		showOwner = false,
+		showOwner = true,
 	}: Props = $props();
 </script>
 
@@ -39,8 +39,6 @@
 		{/if}
 		<span class="date">{new Date(minigame.createdAt).toLocaleDateString()}</span>
 	</p>
-
-	<a href={`/api/minigame/${minigame.id}/download`} class="download-btn">Download .sb3</a>
 </div>
 
 <style>
@@ -72,10 +70,5 @@
 		background: #eee;
 		padding: 0.15rem 0.5rem;
 		border-radius: 4px;
-	}
-    
-	.download-btn {
-		display: inline-block;
-		margin-top: 0.5rem;
 	}
 </style>
