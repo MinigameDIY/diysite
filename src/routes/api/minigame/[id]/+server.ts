@@ -1,6 +1,6 @@
 import { auth } from "$lib/server/auth/auth";
 import { db } from "$lib/server/db/db";
-import { minigame, collectionMinigames } from "$lib/server/db/schema";
+import { minigame, collectionMinigames } from "$lib/server/db/schema.ts";
 import { eq } from "drizzle-orm";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";

@@ -4,7 +4,7 @@ import {
 	collection,
 	collectionMinigames,
 	minigame,
-} from "$lib/server/db/schema";
+} from "$lib/server/db/schema.ts";
 import { eq, and, inArray } from "drizzle-orm";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
@@ -172,12 +172,10 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 			if (toAdd.length > 0) {
 				await db.transaction(async (tx) => {
 					for (const id of toAdd) {
-						await tx
-							.insert(collectionMinigames)
-							.values({
-								collectionId: params.id,
-								minigameId: id,
-							});
+						await tx.insert(collectionMinigames).values({
+							collectionId: params.id,
+							minigameId: id,
+						});
 					}
 				});
 			}

@@ -1,6 +1,6 @@
 import { auth } from "$lib/server/auth/auth";
 import { db } from "$lib/server/db/db";
-import { minigame } from "$lib/server/db/schema";
+import { minigame } from "$lib/server/db/schema.ts";
 import { eq } from "drizzle-orm";
 import { error } from "@sveltejs/kit";
 import { readFile } from "fs/promises";

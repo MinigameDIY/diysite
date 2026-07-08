@@ -1,5 +1,5 @@
 import { db } from "$lib/server/db/db";
-import { minigame } from "$lib/server/db/schema";
+import { minigame } from "$lib/server/db/schema.ts";
 import { eq, desc } from "drizzle-orm";
 import { error } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";

@@ -1,6 +1,6 @@
 import { auth } from "$lib/server/auth/auth";
 import { db } from "$lib/server/db/db";
-import { collection } from "$lib/server/db/schema";
+import { collection } from "$lib/server/db/schema.ts";
 import { eq, desc, and } from "drizzle-orm";
 import type { RequestHandler } from "./$types";
 

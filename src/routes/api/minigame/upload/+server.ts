@@ -1,6 +1,6 @@
 import { auth } from "$lib/server/auth/auth";
 import { db } from "$lib/server/db/db";
-import { minigame } from "$lib/server/db/schema";
+import { minigame } from "$lib/server/db/schema.ts";
 import { error, json } from "@sveltejs/kit";
 import { randomUUID } from "crypto";
 import { writeFile, mkdir } from "fs/promises";

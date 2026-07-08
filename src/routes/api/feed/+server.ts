@@ -2,7 +2,7 @@ import { db } from "$lib/server/db/db";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { eq, desc, and } from "drizzle-orm";
-import { minigame, collection, user } from "$lib/server/db/schema";
+import { minigame, collection, user } from "$lib/server/db/schema.ts";
 
 const VALID_FEED_TYPES: string[] = ["date"];
 const VALID_ELEMENT_TYPES = {

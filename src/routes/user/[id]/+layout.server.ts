@@ -1,5 +1,5 @@
 import { db } from "$lib/server/db/db";
-import { user } from "$lib/server/db/schema";
+import { user } from "$lib/server/db/schema.ts";
 import { eq } from "drizzle-orm";
 import { error } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";

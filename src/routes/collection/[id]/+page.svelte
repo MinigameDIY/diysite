@@ -30,7 +30,7 @@
 			console.log(e);
 		}
 
-		for (minigame of collection_minigames) {
+		for (const minigame of collection_minigames) {
 			diyUrls.push(`/api/minigame/${minigame.id}/download`);
 		}
 	});

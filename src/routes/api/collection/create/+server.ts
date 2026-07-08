@@ -1,6 +1,6 @@
 import { auth } from "$lib/server/auth/auth";
 import { db } from "$lib/server/db/db";
-import { collection, collectionMinigames } from "$lib/server/db/schema";
+import { collection, collectionMinigames } from "$lib/server/db/schema.ts";
 import { error, json } from "@sveltejs/kit";
 import { randomUUID } from "crypto";
 import type { RequestHandler } from "./$types";
