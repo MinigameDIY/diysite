@@ -1,6 +1,8 @@
 <script>
 	import { authClient } from "$lib/client/auth-client";
 	import { goto } from "$app/navigation";
+	import GlanceBox from "$lib/components/GlanceBox.svelte";
+	import TitleText from "$lib/components/TitleText.svelte";
 
 	const session = authClient.useSession();
 
@@ -10,11 +12,30 @@
 	}
 </script>
 
-{#if $session.data}
-	<p>Hi {$session.data.user.name}!</p>
-	<a href="/minigame/upload">Upload Project</a>
-	<a href="/collection/create">Create Collection</a>
-	<button onclick={handleLogout}>Log Out</button>
-{:else}
-	<a href="/login">Log in</a> or <a href="/signup">Sign up</a>
-{/if}
+<!--{#if $session.data}-->
+<div class="glance-bar">
+	<GlanceBox>
+		<TitleText text="What's happening?" />
+		lalla
+	</GlanceBox>
+	<GlanceBox>
+		<TitleText text="News" />
+		gdfg
+	</GlanceBox>
+</div>
+
+<!-- {/if} -->
+
+<style>
+	.glance-bar {
+		margin-top: 50px;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		justify-content: space-between;
+		gap: 50px;
+		width: 100%;
+		flex-shrink: 0;
+		height: 500px;
+	}
+</style>

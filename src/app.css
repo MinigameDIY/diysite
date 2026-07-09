@@ -1,0 +1,11 @@
+:root {
+	--page-pad: calc(5vw);
+	--navbar-height: 50px;
+	--main-color: #f17904ff;
+	--secondary-color: #804d00ff;
+}
+
+body {
+	font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
+	margin: 0;
+}
